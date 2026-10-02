@@ -1,7 +1,10 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Windows;
 using MonitorAltTab.Core;
 using MonitorAltTab.UI;
@@ -11,125 +14,187 @@ using MessageBox = System.Windows.MessageBox;
 namespace MonitorAltTab
 {
     /// <summary>
-    /// Application entry point. Sets up tray icon, overlay, and Alt+Tab manager.
+    /// Application entry point. Sets up tray icon, overlay, control panel, and Alt+Tab manager.
     /// </summary>
     public partial class App : Application
     {
         private AltTabManager? _altTabManager;
         private AltTabOverlay? _overlay;
+        private ControlPanelWindow? _controlPanel;
         private System.Windows.Forms.NotifyIcon? _trayIcon;
-        private bool _isEnabled = true;
+        private System.Windows.Forms.ToolStripMenuItem? _statusMenuItem;
+        private AppSettings _settings = new();
+        private Mutex? _instanceMutex;
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
             // Prevent multiple instances
-            string mutexName = "MonitorAltTab_SingleInstance";
-            bool createdNew;
-            var mutex = new System.Threading.Mutex(true, mutexName, out createdNew);
+            const string mutexName = "AltTabCanavari_SingleInstance_Mutex";
+            _instanceMutex = new Mutex(true, mutexName, out bool createdNew);
             if (!createdNew)
             {
-                MessageBox.Show("MonitorAltTab is already running.", "MonitorAltTab", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(
+                    "Alt Tab Canavarı zaten çalışıyor!\n\nEkranın sağ altındaki sistem tepsisi (saat yanı) simgesine çift tıklayarak Kontrol Panelini açabilirsiniz.",
+                    "Alt Tab Canavarı",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
                 Shutdown();
                 return;
             }
 
-            Debug.WriteLine("[App] Starting MonitorAltTab...");
+            Debug.WriteLine("[App] Starting Alt Tab Canavarı...");
+
+            // Load settings
+            _settings = AppSettings.Load();
 
             // Create the overlay (hidden initially)
             _overlay = new AltTabOverlay();
-            _overlay.Show(); // Must be shown once to get HWND, then hidden
+            _overlay.Show();
             _overlay.Visibility = Visibility.Collapsed;
 
             // Create and start the manager
             _altTabManager = new AltTabManager();
             _altTabManager.RegisterOverlay(_overlay);
-            _altTabManager.Start();
+
+            if (_settings.IsEnabled)
+            {
+                _altTabManager.Start();
+            }
+
+            // Create Control Panel window
+            _controlPanel = new ControlPanelWindow(_altTabManager, _settings);
+            _controlPanel.RequestExit += ExitApplication;
+            _controlPanel.HookStateChanged += OnHookStateChanged;
 
             // Setup tray icon
             SetupTrayIcon();
 
-            Debug.WriteLine("[App] MonitorAltTab started successfully.");
+            // Determine if started minimized
+            bool startMinimized = e.Args.Any(a => a.Equals("--minimized", StringComparison.OrdinalIgnoreCase))
+                                  || _settings.StartMinimized;
+
+            if (startMinimized)
+            {
+                _trayIcon?.ShowBalloonTip(3000, "Alt Tab Canavarı", "Arka planda ve sistem tepsisinde çalışıyor.", System.Windows.Forms.ToolTipIcon.Info);
+            }
+            else
+            {
+                _controlPanel.Show();
+            }
+
+            Debug.WriteLine("[App] Alt Tab Canavarı started successfully.");
         }
 
         private void SetupTrayIcon()
         {
             _trayIcon = new System.Windows.Forms.NotifyIcon();
 
-            // Create a simple icon programmatically
-            _trayIcon.Icon = CreateTrayIcon();
-            _trayIcon.Text = "MonitorAltTab - Per-Monitor Alt+Tab";
+            // Load icon
+            try
+            {
+                string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "app.ico");
+                if (File.Exists(iconPath))
+                {
+                    _trayIcon.Icon = new Icon(iconPath);
+                }
+                else
+                {
+                    // Extract from process executable
+                    string? currentExe = Environment.ProcessPath;
+                    _trayIcon.Icon = !string.IsNullOrEmpty(currentExe)
+                        ? Icon.ExtractAssociatedIcon(currentExe) ?? CreateFallbackIcon()
+                        : CreateFallbackIcon();
+                }
+            }
+            catch
+            {
+                _trayIcon.Icon = CreateFallbackIcon();
+            }
+
+            _trayIcon.Text = _settings.IsEnabled ? "Alt Tab Canavarı - Çalışıyor" : "Alt Tab Canavarı - Duraklatıldı";
             _trayIcon.Visible = true;
 
             // Context menu
             var contextMenu = new System.Windows.Forms.ContextMenuStrip();
 
-            // Status item
-            var statusItem = new System.Windows.Forms.ToolStripMenuItem("✓ Enabled")
+            // Open Control Panel
+            var openItem = new System.Windows.Forms.ToolStripMenuItem("⚡ Kontrol Panelini Aç")
             {
-                Name = "statusItem",
-                Enabled = true,
+                Font = new Font(contextMenu.Font, System.Drawing.FontStyle.Bold)
             };
-            statusItem.Click += (s, e) => ToggleEnabled(statusItem);
-            contextMenu.Items.Add(statusItem);
+            openItem.Click += (s, e) => ShowControlPanel();
+            contextMenu.Items.Add(openItem);
 
             contextMenu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
 
-            // About
-            var aboutItem = new System.Windows.Forms.ToolStripMenuItem("About MonitorAltTab");
-            aboutItem.Click += (s, e) =>
-            {
-                MessageBox.Show(
-                    "MonitorAltTab v1.0\n\n" +
-                    "Per-monitor Alt+Tab switcher.\n" +
-                    "Alt+Tab only shows windows on the monitor\n" +
-                    "where your mouse cursor is.\n\n" +
-                    "Shortcuts:\n" +
-                    "• Alt+Tab: Switch forward\n" +
-                    "• Alt+Shift+Tab: Switch backward\n" +
-                    "• Escape: Cancel\n\n" +
-                    "Built with .NET 8 + WPF",
-                    "About MonitorAltTab",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-            };
-            contextMenu.Items.Add(aboutItem);
+            // Status toggle item
+            _statusMenuItem = new System.Windows.Forms.ToolStripMenuItem(
+                _settings.IsEnabled ? "✓ Devrede (Aktif)" : "✗ Duraklatıldı");
+            _statusMenuItem.Click += (s, e) => ToggleHookState(!_settings.IsEnabled);
+            contextMenu.Items.Add(_statusMenuItem);
 
             contextMenu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
 
             // Exit
-            var exitItem = new System.Windows.Forms.ToolStripMenuItem("Exit");
+            var exitItem = new System.Windows.Forms.ToolStripMenuItem("❌ Çıkış Yap");
             exitItem.Click += (s, e) => ExitApplication();
             contextMenu.Items.Add(exitItem);
 
             _trayIcon.ContextMenuStrip = contextMenu;
-            _trayIcon.DoubleClick += (s, e) => ToggleEnabled(statusItem);
+
+            // Double click opens control panel
+            _trayIcon.DoubleClick += (s, e) => ShowControlPanel();
         }
 
-        private void ToggleEnabled(System.Windows.Forms.ToolStripMenuItem statusItem)
+        public void ShowControlPanel()
         {
-            _isEnabled = !_isEnabled;
+            if (_controlPanel == null) return;
 
-            if (_isEnabled)
+            _controlPanel.Show();
+            if (_controlPanel.WindowState == WindowState.Minimized)
+            {
+                _controlPanel.WindowState = WindowState.Normal;
+            }
+            _controlPanel.Activate();
+            _controlPanel.RefreshMonitorStatus();
+        }
+
+        private void OnHookStateChanged(bool isEnabled)
+        {
+            ToggleHookState(isEnabled, updateControlPanel: false);
+        }
+
+        private void ToggleHookState(bool isEnabled, bool updateControlPanel = true)
+        {
+            _settings.IsEnabled = isEnabled;
+            _settings.Save();
+
+            if (isEnabled)
             {
                 _altTabManager?.Start();
-                statusItem.Text = "✓ Enabled";
-                _trayIcon!.Text = "MonitorAltTab - Per-Monitor Alt+Tab";
-                Debug.WriteLine("[App] Alt+Tab hook enabled.");
+                if (_statusMenuItem != null) _statusMenuItem.Text = "✓ Devrede (Aktif)";
+                if (_trayIcon != null) _trayIcon.Text = "Alt Tab Canavarı - Çalışıyor";
+                _trayIcon?.ShowBalloonTip(2000, "Alt Tab Canavarı", "Aktif edildi, Alt+Tab devrede.", System.Windows.Forms.ToolTipIcon.Info);
             }
             else
             {
                 _altTabManager?.Stop();
-                statusItem.Text = "✗ Disabled";
-                _trayIcon!.Text = "MonitorAltTab - DISABLED";
-                Debug.WriteLine("[App] Alt+Tab hook disabled.");
+                if (_statusMenuItem != null) _statusMenuItem.Text = "✗ Duraklatıldı";
+                if (_trayIcon != null) _trayIcon.Text = "Alt Tab Canavarı - Duraklatıldı";
+                _trayIcon?.ShowBalloonTip(2000, "Alt Tab Canavarı", "Duraklatıldı. Standart Windows Alt+Tab kullanılacak.", System.Windows.Forms.ToolTipIcon.Warning);
+            }
+
+            if (updateControlPanel && _controlPanel != null)
+            {
+                _controlPanel.UpdateHookState(isEnabled);
             }
         }
 
         private void ExitApplication()
         {
-            Debug.WriteLine("[App] Exiting...");
+            Debug.WriteLine("[App] Exiting Alt Tab Canavarı...");
 
             _altTabManager?.Dispose();
             _altTabManager = null;
@@ -141,8 +206,15 @@ namespace MonitorAltTab
                 _trayIcon = null;
             }
 
+            _controlPanel?.RealClose();
+            _controlPanel = null;
+
             _overlay?.Close();
             _overlay = null;
+
+            _instanceMutex?.ReleaseMutex();
+            _instanceMutex?.Dispose();
+            _instanceMutex = null;
 
             Shutdown();
         }
@@ -157,39 +229,19 @@ namespace MonitorAltTab
                 _trayIcon.Dispose();
             }
 
+            _instanceMutex?.Dispose();
             base.OnExit(e);
         }
 
-        /// <summary>
-        /// Creates a simple tray icon programmatically.
-        /// </summary>
-        private static Icon CreateTrayIcon()
+        private static Icon CreateFallbackIcon()
         {
-            // Create a 32x32 icon with a simple design
             using var bmp = new Bitmap(32, 32);
-            using var g = System.Drawing.Graphics.FromImage(bmp);
-
-            // Background
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using var g = Graphics.FromImage(bmp);
             g.Clear(System.Drawing.Color.Transparent);
-
-            // Draw a rounded rect with gradient-like look
-            using var bgBrush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(220, 50, 100, 220));
-            g.FillRectangle(bgBrush, 2, 2, 28, 28);
-
-            // Draw "M" letter
-            using var font = new System.Drawing.Font("Segoe UI", 16, System.Drawing.FontStyle.Bold);
-            using var textBrush = new System.Drawing.SolidBrush(System.Drawing.Color.White);
-            var sf = new System.Drawing.StringFormat
-            {
-                Alignment = System.Drawing.StringAlignment.Center,
-                LineAlignment = System.Drawing.StringAlignment.Center
-            };
-            g.DrawString("M", font, textBrush, new System.Drawing.RectangleF(0, 0, 32, 32), sf);
-
-            // Convert to icon
+            using var brush = new SolidBrush(System.Drawing.Color.FromArgb(99, 102, 241));
+            g.FillEllipse(brush, 2, 2, 28, 28);
             IntPtr hIcon = bmp.GetHicon();
-            return System.Drawing.Icon.FromHandle(hIcon);
+            return Icon.FromHandle(hIcon);
         }
     }
 }

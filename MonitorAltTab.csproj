@@ -8,10 +8,31 @@
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AssemblyName>MonitorAltTab</AssemblyName>
+    <AssemblyName>AltTabCanavari</AssemblyName>
     <RootNamespace>MonitorAltTab</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <Product>Alt Tab Canavarı</Product>
+    <Title>Alt Tab Canavarı</Title>
+    <Description>Windows 10 ve 11 için Çoklu Monitör Akıllı Alt+Tab Pencere Yöneticisi</Description>
+    <Company>Akadirr1</Company>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Resource Include="Assets\app.ico" />
+    <Resource Include="Assets\logo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="AltTabCanavari.cer">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Sertifika_Yukle.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

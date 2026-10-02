@@ -1,0 +1,31 @@
+===========================================================
+                ALT TAB CANAVARI v1.1.0
+   Çoklu Monitör Akıllı Alt+Tab Pencere Yöneticisi
+===========================================================
+
+Geliştirici: Akadirr1
+GitHub: https://github.com/Akadirr1/alt_tab_canavari
+
+-----------------------------------------------------------
+1. HIZLI BAŞLANGIÇ
+-----------------------------------------------------------
+- AltTabCanavari.exe dosyasını çift tıklayarak çalıştırın.
+- Karşınıza modern "Kontrol Paneli" açılacaktır.
+- Buradan monitörlerinizi, açık pencerelerinizi ve ayarları görebilirsiniz.
+- Pencereyi kapattığınızda uygulama arka planda (saat yanındaki sistem tepsisinde) çalışmaya devam eder.
+
+-----------------------------------------------------------
+2. SERTİFİKA VE SMART SCREEN
+-----------------------------------------------------------
+- Uygulama güvenli bir şekilde dijital olarak imzalanmıştır.
+- Windows SmartScreen uyarısını tamamen kaldırmak için:
+  "Sertifika_Yukle.bat" dosyasını çalıştırın ve gelen onay kutusuna "Evet" deyin.
+- Alternatif olarak Kontrol Paneli içerisindeki "Sertifikayı Yükle" butonuna tıklayabilirsiniz.
+
+-----------------------------------------------------------
+3. KISAYOLLAR
+-----------------------------------------------------------
+- Alt + Tab: Fare imlecinizin olduğu ekrandaki sonraki pencereye geçer.
+- Alt + Shift + Tab: Ters yönde önceki pencereye geçer.
+- Fare Sol Tık: Açılan overlay üzerinden istediğiniz pencereye tıklayarak doğrudan seçebilirsiniz.
+- Escape (Esc): Seçimi iptal eder.

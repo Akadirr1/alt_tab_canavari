@@ -1,193 +1,107 @@
-# 🖥️ Alt Tab Canavarı
-
-**Windows 10/11 için Monitör Bazlı Alt+Tab Değiştirici**
-
-Mouse imlecinin bulunduğu monitöre göre çalışan, tamamen özel yapım Alt+Tab uygulaması.
-
----
-
-## ✨ Özellikler
-
-- **Monitör Bazlı Geçiş** — Alt+Tab sadece mouse'un bulunduğu monitördeki pencereleri gösterir
-- **Özel Overlay** — Koyu temalı, modern görünümlü pencere geçiş arayüzü
-- **Tam Pencere Döngüsü** — 3, 5, 10+ pencere arasında sırayla geçiş yapabilirsiniz
-- **Mouse ile Tıklama** — Overlay'deki herhangi bir pencereye tıklayarak geçiş yapabilirsiniz
-- **Mouse Hover** — Üzerine gelinen pencere otomatik olarak seçilir
-- **Ters Geçiş** — `Shift+Tab` ile ters yönde dolaşabilirsiniz
-- **Çoklu Monitör** — 2, 3 veya daha fazla monitörü destekler
-- **DPI Uyumlu** — Farklı DPI/ölçeklendirme ayarlarıyla çalışır
-- **Sistem Tepsisi** — Sessizce arka planda çalışır
-- **Açma/Kapama** — Tray menüsünden etkinleştirip devre dışı bırakabilirsiniz
+<div align="center">
+  <img src="Assets/logo.png" width="160" alt="Alt Tab Canavarı Logo" style="border-radius: 24px;" />
+  <h1>👾 Alt Tab Canavarı</h1>
+  <p><strong>Windows 10 ve 11 için Çoklu Monitör Akıllı Alt+Tab Pencere Yöneticisi</strong></p>
+  <p>
+    <a href="https://github.com/Akadirr1/alt_tab_canavari/releases"><img src="https://img.shields.io/github/v/release/Akadirr1/alt_tab_canavari?style=for-the-badge&color=blue" alt="Release" /></a>
+    <a href="https://github.com/Akadirr1/alt_tab_canavari/releases"><img src="https://img.shields.io/badge/Platform-Windows%2010%20%7C%2011-0078D6?style=for-the-badge&logo=windows" alt="Windows" /></a>
+    <a href="https://dotnet.microsoft.com/download/dotnet/8.0"><img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet" alt=".NET 8" /></a>
+  </p>
+</div>
 
 ---
 
-## ⌨️ Kısayollar
+## 🎯 Nedir?
+
+Windows'un varsayılan Alt+Tab davranışında tüm ekranlardaki pencereler tek bir listede toplanır ve bu da çoklu monitör kullananlarda dikkat dağınıklığına yol açar.
+
+**Alt Tab Canavarı**, fare imlecinizin bulunduğu monitörü anlık olarak tespit eder ve `Alt+Tab` tuşlarına bastığınızda **yalnızca o ekranda bulunan açık pencereleri** listeler! Diğer ekranlardaki pencereler kesinlikle araya girmez.
+
+---
+
+## ✨ Temel Özellikler
+
+- 🖥️ **Monitör Bazlı Filtreleme**: Fare imleciniz hangi ekrandaysa yalnızca o ekrandaki pencereler gösterilir.
+- 🎛️ **Modern Kontrol Paneli**: Bağlı monitörleri, farenin bulunduğu ekranı ve açık pencereleri canlı olarak izleyebileceğiniz modern karanlık tema arayüz.
+- 🎨 **Özel Akıcı Overlay**: Koyu temalı, uygulama simgelerini ve başlıklarını içeren modern Alt+Tab arayüzü.
+- 🖱️ **Fare ile Doğrudan Seçim**: Açılan liste üzerinden istediğiniz pencereye tıklayarak anında öne getirebilirsiniz.
+- 🔄 **Sınırsız Dolaşım**: `Tab` ile ileri, `Shift+Tab` ile geri yönde tüm pencereleri gezebilme.
+- 🛡️ **Dijital İmzalı & SmartScreen Uyumlu**: Uygulama dijital olarak imzalanmıştır. Tek tıkla yerel güvenilir yayıncılara eklenebilir.
+- 🚀 **Windows ile Otomatik Başlatma**: İsteğe bağlı olarak Windows açılışında arka planda sessizce başlayabilir.
+- 📌 **Sistem Tepsisi Entegrasyonu**: Kapatıldığında arka planda minimum kaynak tüketimiyle (10 MB RAM) sessizce çalışmaya devam eder.
+
+---
+
+## ⌨️ Kısayollar ve Kullanım
 
 | Kısayol | İşlev |
 |---------|-------|
-| `Alt + Tab` | Overlay'i aç, sonraki pencereye geç |
-| `Alt + Tab` (tekrar) | Pencereler arasında ileri doğru dolaş |
-| `Alt + Shift + Tab` | Ters yönde dolaş |
-| `Alt` (bırak) | Seçili pencereyi etkinleştir |
-| `Esc` | İptal et, overlay'i kapat |
-| **Mouse tıklama** | Tıklanan pencereyi etkinleştir |
-| **Mouse hover** | Üzerine gelinen pencereyi seç |
+| `Alt + Tab` | Overlay'i açar, sıradaki pencereye geçer |
+| `Alt + Tab` (tekrar) | Pencereler arasında ileri doğru dolaşır |
+| `Alt + Shift + Tab` | Ters yönde geriye doğru dolaşır |
+| `Alt` (bırakma) | Seçili pencereyi ön plana getirir |
+| `Fare Sol Tık` | Listeden tıklanan pencereyi doğrudan aktifleştirir |
+| `Escape (Esc)` | Seçimi iptal eder, overlay'i kapatır |
 
 ---
 
 ## 🖱️ Nasıl Çalışır?
 
 ```
-Mouse sol monitörde → Alt+Tab → Sadece sol monitör pencereleri
-Mouse sağ monitörde → Alt+Tab → Sadece sağ monitör pencereleri
+Fare Sol Monitörde  ──►  Alt+Tab  ──►  Yalnızca Sol Ekrandaki Pencereler
+Fare Sağ Monitörde ──►  Alt+Tab  ──►  Yalnızca Sağ Ekrandaki Pencereler
 ```
 
-### Örnek Senaryo
-
 ```
-Sol Monitör:           Sağ Monitör:
-├── Chrome             ├── Discord
-├── VS Code            ├── Explorer  
-└── Terminal           ├── Edge
-                       └── Notepad
+[Sol Monitör]                      [Sağ Monitör]
+├── Visual Studio Code              ├── Google Chrome
+├── Windows Terminal                ├── Spotify
+└── Slack                           └── Discord
 ```
-
-Mouse **sağ monitörde**yken `Alt+Tab`:
-
-```
-Discord → Explorer → Edge → Notepad → Discord → ...
-```
-
-Chrome, VS Code, Terminal **kesinlikle gösterilmez**.
+Fare sağ ekrandayken `Alt+Tab` basıldığında yalnızca **Chrome ➔ Spotify ➔ Discord** arasında geçiş yapılır.
 
 ---
 
-## 🚀 Kurulum & Çalıştırma
+## 🛡️ Sertifika ve SmartScreen Çözümü
 
-### Gereksinimler
+Windows, bağımsız geliştiricilerin yeni uygulamalarını indirdiğinizde *"Windows bilgisayarınızı korudu"* (SmartScreen) uyarısı verebilir.
 
-- Windows 10 veya 11
-- [.NET 8 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
+Bu projede **Alt Tab Canavarı** adına özel dijital sertifika üretilmiştir. Uyarıyı tamamen kaldırmak için:
 
-### Kaynaktan Derleme
+1. İndirdiğiniz zip içerisindeki **`Sertifika_Yukle.bat`** dosyasını çalıştırın (veya Kontrol Panelindeki **"Sertifikayı Yükle"** butonuna tıklayın).
+2. Gelen onay penceresine **"Evet"** deyin.
+3. Artık Windows bu uygulamayı güvenilir yayıncı olarak tanır ve hiçbir uyarı vermeden doğrudan açar.
+
+*(Alternatif olarak SmartScreen çıktığında **"Ek bilgi"** ➔ **"Yine de çalıştır"** diyebilirsiniz).*
+
+---
+
+## 📦 Kurulum ve Çalıştırma
+
+Kurulum veya ek yazılım (`.NET Runtime`) gerekmez!
+
+1. [Releases](https://github.com/Akadirr1/alt_tab_canavari/releases) sayfasından son sürümü indirin.
+2. `AltTabCanavari.exe` dosyasını çalıştırın.
+3. Kontrol Paneli açıldığında monitörlerinizi ve durumunuzu görebilir, ardından pencereyi kapatıp tepside çalışmaya bırakabilirsiniz.
+
+---
+
+## 🛠️ Kaynak Koddan Derleme
 
 ```bash
+# Projeyi klonlayın
 git clone https://github.com/Akadirr1/alt_tab_canavari.git
 cd alt_tab_canavari
-dotnet build -c Release
+
+# Tek dosya bağımsız (Self-Contained) olarak derleyin
+dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
 ```
 
-### Çalıştırma
-
-```bash
-dotnet run
-```
-
-Veya derlenmiş exe:
-
-```bash
-bin\Release\net8.0-windows\MonitorAltTab.exe
-```
-
-### Tek Dosya Yayınlama
-
-```bash
-dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
-```
+Çıktı `bin/Release/net8.0-windows/win-x64/publish/` klasöründe oluşacaktır.
 
 ---
 
-## 🏗️ Mimari
+## 📄 Lisans
 
-```
-alt_tab_canavari/
-├── App.xaml / App.xaml.cs              # Giriş noktası, tray icon
-├── Core/
-│   ├── NativeMethods.cs                # Win32 P/Invoke tanımları
-│   ├── KeyboardHook.cs                 # Low-level keyboard hook (WH_KEYBOARD_LL)
-│   ├── WindowEnumerator.cs             # Pencere listeleme ve filtreleme
-│   ├── MonitorManager.cs               # Monitör tespiti
-│   ├── WindowActivator.cs              # Pencere etkinleştirme
-│   └── AltTabManager.cs               # Oturum yöneticisi
-├── Models/
-│   ├── WindowInfo.cs                   # Pencere veri modeli
-│   └── MonitorInfo.cs                  # Monitör veri modeli
-├── UI/
-│   └── AltTabOverlay.xaml/.cs          # Özel overlay penceresi
-├── app.manifest                        # Uygulama manifest'i
-└── MonitorAltTab.csproj                # Proje dosyası
-```
-
----
-
-## ⚙️ Teknik Detaylar
-
-### Kullanılan Windows API'leri
-
-| API | Kullanım |
-|-----|----------|
-| `SetWindowsHookEx` / `WH_KEYBOARD_LL` | Alt+Tab yakalama |
-| `EnumWindows` | Pencere listeleme |
-| `MonitorFromPoint` | Mouse'un monitörünü tespit etme |
-| `MonitorFromWindow` | Pencerenin monitörünü tespit etme |
-| `GetMonitorInfo` | Monitör bilgisi alma |
-| `SetForegroundWindow` | Pencere etkinleştirme |
-| `DwmGetWindowAttribute` | Cloaked pencere kontrolü |
-| `GetWindowLong` / `GetWindowLongPtr` | Pencere stilleri |
-
-### Pencere Filtreleme
-
-Alt+Tab listesine dahil edilmemesi gereken pencereler:
-
-- Görünmez pencereler (`IsWindowVisible == false`)
-- Başlıksız pencereler
-- Cloaked pencereler (sanal masaüstü gizli pencereler)
-- `WS_EX_TOOLWINDOW` pencereler
-- Shell pencereleri (Progman, WorkerW, Shell_TrayWnd vb.)
-- Devre dışı pencereler (`WS_DISABLED`)
-- Sahipli yardımcı pencereler
-- Overlay'in kendi penceresi
-
-### Klavye Hook State Machine
-
-```
-IDLE ──Alt↓──► ALT_HELD ──Tab↓──► SESSION_ACTIVE
-                                      │
-                    ┌─────────────────┤
-                    │                 │
-                Tab ↓ → sonraki    Shift+Tab ↓ → önceki
-                    │                 │
-                    ├── Escape → iptal → IDLE
-                    ├── Alt↑ → etkinleştir → IDLE
-                    └── Tıklama → etkinleştir → IDLE
-```
-
----
-
-## 🧪 Test Senaryoları
-
-| # | Test | Beklenen Sonuç |
-|---|------|----------------|
-| 1 | Mouse Monitor 2'de, Alt+Tab | Sadece Monitor 2 pencereleri görünür |
-| 2 | 5 pencere açık, Tab ile dolaş | 5 pencere sırayla dolaşılır |
-| 3 | Mouse'u Monitor 1'e geçir, Alt+Tab | Sadece Monitor 1 pencereleri |
-| 4 | Alt+Shift+Tab | Ters sırada geçiş |
-| 5 | Overlay'de pencereye tıkla | Tıklanan pencere etkinleşir |
-| 6 | Overlay'de pencere üzerine gel | Hover ile seçim değişir |
-| 7 | Escape | Overlay kapanır, iptal |
-
----
-
-## 📝 Lisans
-
-MIT
-
----
-
-## 🤝 Katkıda Bulunma
-
-1. Fork'layın
-2. Feature branch oluşturun (`git checkout -b feature/yeni-ozellik`)
-3. Commit atın (`git commit -m 'Yeni özellik ekle'`)
-4. Push edin (`git push origin feature/yeni-ozellik`)
-5. Pull Request açın
+Bu proje MIT lisansı ile lisanslanmıştır.
+Geliştirici: **Akadirr1**
